@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Username Checker</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #101114;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 440px;
+      padding: 30px;
+      background: #1b1c22;
+      border: 1px solid #353640;
+      border-radius: 16px;
+      box-shadow: 0 15px 45px #0007;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 25px;
+    }
+
+    p {
+      color: #aaaeba;
+      line-height: 1.5;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    input {
+      margin: 12px 0;
+      background: #101114;
+      color: white;
+      border: 1px solid #454652;
+      outline: none;
+    }
+
+    input:focus { border-color: #e04444; }
+
+    button {
+      border: none;
+      background: #d93636;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover { background: #ef4545; }
+    button:disabled { opacity: .6; cursor: wait; }
+
+    #result {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #111217;
+      overflow-wrap: anywhere;
+      line-height: 1.5;
+    }
+
+    .available { color: #5be39a; }
+    .taken { color: #ff7070; }
+    .error { color: #ffc36b; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>Roblox Username Checker</h1>
+    <p>Check whether a Roblox username is available.</p>
+
+    <form id="checker">
+      <input
+        id="username"
+        type="text"
+        placeholder="Enter a username"
+        minlength="3"
+        maxlength="20"
+        pattern="[A-Za-z0-9_]+"
+        autocomplete="off"
+        required
+      >
+      <button id="checkButton" type="submit">Check Username</button>
+    </form>
+
+    <div id="result" class="hidden" role="status"></div>
+  </main>
+
+  <script>
+    const API = "https://usernamechecker.jakakakaaalala.workers.dev";
+
+    const form = document.getElementById("checker");
+    const input = document.getElementById("username");
+    const button = document.getElementById("checkButton");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const username = input.value.trim();
+
+      result.className = "";
+      result.textContent = "Checking username...";
+      button.disabled = true;
+      button.textContent = "Checking...";
+
+      try {
+        const response = await fetch(
+          `${API}/api/check?username=${encodeURIComponent(username)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          result.className = "error";
+          result.textContent = data.error || "The check failed. Try again.";
+        } else if (data.available) {
+          result.className = "available";
+          result.textContent = `✓ "${username}" appears to be available!`;
+        } else {
+          result.className = "taken";
+          result.textContent = `✗ "${username}" is unavailable. ${data.message || ""}`;
+        }
+      } catch (error) {
+        result.className = "error";
+        result.textContent = "Could not connect to the checker. Try again later.";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Check Username";
+      }
+    });
+  </script>
+</body>
+</html>
