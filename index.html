@@ -2,152 +2,723 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Username Checker</title>
-  <style>
-    * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101114">
+<title>UsernameChecker — Roblox</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0f;
+  --panel: rgba(24,25,31,.83);
+  --line: rgba(255,255,255,.09);
+  --muted: #9295a2;
+  --red: #ff454f;
+  --red2: #a90f28;
+  --green: #5ff0ad;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: #f7f7fa;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button, input, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: #ff454f55; }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #101114;
-      color: #f5f5f5;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% -15%, #58202a55, transparent 48%),
+    radial-gradient(ellipse at 100% 65%, #27152340, transparent 40%),
+    #0b0c0f;
+}
+.ambient::before, .ambient::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: .14;
+  animation: drift 13s ease-in-out infinite alternate;
+}
+.ambient::before { background: #fa263f; top: 10%; left: -250px; }
+.ambient::after {
+  background: #6d244b;
+  right: -250px;
+  bottom: 5%;
+  animation-delay: -6s;
+}
+.grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .13;
+  background-image:
+    linear-gradient(#ffffff09 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff09 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 90%);
+}
+@keyframes drift {
+  from { transform: translate(0,0) scale(.9); }
+  to { transform: translate(80px,40px) scale(1.18); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 #ff454f00; }
+  50% { box-shadow: 0 0 0 7px #ff454f0d; }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+@keyframes shine {
+  from { background-position: 180% 0; }
+  to { background-position: -180% 0; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-    .panel {
-      width: 100%;
-      max-width: 440px;
-      padding: 30px;
-      background: #1b1c22;
-      border: 1px solid #353640;
-      border-radius: 16px;
-      box-shadow: 0 15px 45px #0007;
-    }
+.wrap { width: min(1100px, calc(100% - 40px)); margin: auto; }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 25px;
-    }
+nav {
+  height: 78px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ffffff0c;
+}
+.brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -.5px; }
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #ff5a64, #9d1027);
+  box-shadow: 0 5px 24px #ff334022;
+}
+.brand-icon svg { width: 23px; height: 23px; }
+.brand span { color: var(--red); }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: #ffffff04;
+  color: #c5c6ce;
+  border-radius: 999px;
+  padding: 9px 13px;
+  font-size: 12px;
+}
+.dot {
+  width: 7px; height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 12px #5ff0ad77;
+}
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  align-items: center;
+  gap: 35px;
+  padding: 66px 0 42px;
+  animation: rise .7s ease both;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #ff454f35;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #ff454f0a;
+  color: #ff8d94;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+.eyebrow svg { width: 14px; height: 14px; }
+h1 {
+  margin: 22px 0 15px;
+  font-size: clamp(39px, 5.8vw, 65px);
+  letter-spacing: -3.6px;
+  line-height: 1.02;
+  font-weight: 850;
+}
+h1 .accent {
+  color: transparent;
+  background: linear-gradient(100deg, #ff777f, #ff3448 60%, #bb1a38);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.hero p { color: var(--muted); font-size: 15px; line-height: 1.8; max-width: 440px; }
+.hero-art { position: relative; min-height: 260px; display: grid; place-items: center; }
+.art-glow {
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  background: #ff24321c;
+  filter: blur(48px);
+  border-radius: 50%;
+}
+.art-card {
+  position: relative;
+  width: min(100%, 310px);
+  padding: 19px;
+  border: 1px solid #ffffff17;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #28252bdf, #131419ed);
+  box-shadow: 0 30px 90px #0008, inset 0 1px #ffffff0b;
+  transform: rotate(3deg);
+  animation: float 6s ease-in-out infinite;
+}
+.art-top { display: flex; align-items: center; justify-content: space-between; }
+.art-label { color: #999ba7; font-size: 11px; }
+.art-tag { color: var(--green); font-size: 10px; background: #5ff0ad12; border: 1px solid #5ff0ad25; padding: 6px 9px; border-radius: 20px; }
+.avatar-scene {
+  position: relative;
+  height: 150px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin: 14px 0;
+  border-radius: 15px;
+  background:
+    radial-gradient(ellipse at 50% 85%, #c6294633, transparent 60%),
+    linear-gradient(135deg, #26232a, #15161c);
+}
+.avatar-scene::before {
+  content: "";
+  position: absolute;
+  width: 150px; height: 150px;
+  border: 1px solid #ffffff0c;
+  border-radius: 50%;
+}
+.avatar-scene::after {
+  content: "";
+  position: absolute;
+  width: 190px; height: 190px;
+  border: 1px solid #ffffff09;
+  border-radius: 50%;
+}
+.avatar-svg { width: 115px; position: relative; z-index: 1; filter: drop-shadow(0 12px 20px #ff354033); }
+.art-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.art-name { font-size: 13px; font-weight: 750; }
+.art-sub { color: #828490; font-size: 10px; margin-top: 5px; }
+.art-check {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  color: var(--green); background: #5ff0ad12; border: 1px solid #5ff0ad25;
+  border-radius: 11px; font-size: 18px;
+}
+.float-chip {
+  position: absolute;
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 13px;
+  background: #202127eF;
+  border: 1px solid #ffffff17;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px #0005;
+  font-size: 11px;
+  animation: float 5s ease-in-out infinite;
+}
+.float-chip b { color: var(--green); }
+.chip-one { left: -5px; top: 26px; }
+.chip-two { right: -8px; bottom: 25px; animation-delay: -2.5s; }
 
-    p {
-      color: #aaaeba;
-      line-height: 1.5;
-    }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
+.section-heading h2 { font-size: 17px; letter-spacing: -.4px; margin: 0; }
+.section-heading span { color: var(--muted); font-size: 11px; }
 
-    input, button {
-      width: 100%;
-      padding: 13px;
-      border-radius: 8px;
-      font-size: 15px;
-    }
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 17px;
+  padding-bottom: 26px;
+}
+.panel {
+  min-width: 0;
+  padding: 23px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #1b1c22eF, #131419eF);
+  box-shadow: 0 20px 60px #0002, inset 0 1px #ffffff04;
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+}
+.panel:hover { border-color: #ffffff19; box-shadow: 0 20px 65px #0004, 0 0 30px #ff354006; }
+.panel-icon {
+  width: 39px; height: 39px; display: grid; place-items: center;
+  border-radius: 12px; background: #ff454f12; color: #ff737c;
+  border: 1px solid #ff454f1c;
+}
+.panel-icon svg { width: 19px; height: 19px; }
+.panel-heading { display: flex; gap: 12px; align-items: center; margin-bottom: 19px; }
+.panel-heading h2 { margin: 0; font-size: 15px; }
+.panel-heading p { margin: 5px 0 0; font-size: 11px; color: var(--muted); }
 
-    input {
-      margin: 12px 0;
-      background: #101114;
-      color: white;
-      border: 1px solid #454652;
-      outline: none;
-    }
+.field-label { display: block; color: #c4c5ce; font-size: 11px; font-weight: 700; margin: 0 0 9px; }
+.input-wrap { position: relative; }
+input, textarea {
+  width: 100%;
+  color: #fff;
+  background: #0e0f13;
+  border: 1px solid #34353f;
+  border-radius: 11px;
+  padding: 14px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+input { padding-right: 48px; }
+input:focus, textarea:focus { border-color: #ff454f85; box-shadow: 0 0 0 4px #ff454f0d; }
+.input-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #777a86; font-size: 10px; }
+textarea { min-height: 120px; resize: vertical; font-family: inherit; line-height: 1.7; font-size: 12px; }
+textarea::placeholder, input::placeholder { color: #626570; }
+.hint { margin: 9px 0 15px; font-size: 11px; line-height: 1.6; color: #777a86; }
 
-    input:focus { border-color: #e04444; }
+.btn {
+  width: 100%;
+  min-height: 45px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 750;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform .2s, filter .2s, background .2s;
+}
+.btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.12); }
+.btn:active:not(:disabled) { transform: scale(.985); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn svg { width: 16px; height: 16px; }
+.btn-primary {
+  color: white;
+  background: linear-gradient(110deg, #fa4754, #c91d3c);
+  box-shadow: 0 8px 24px #ed26321d;
+  animation: pulse 4s infinite;
+}
+.btn-secondary { color: #d4d5de; background: #ffffff06; border-color: #ffffff12; }
+.btn-quiet { color: #ff8c94; background: #ff454f0b; border-color: #ff454f1a; }
+.btn-row { display: flex; gap: 9px; margin-top: 10px; }
+.btn-row .btn { flex: 1; }
+.hidden { display: none !important; }
 
-    button {
-      border: none;
-      background: #d93636;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.result-box {
+  margin-top: 15px;
+  padding: 13px;
+  border: 1px solid #ffffff0d;
+  border-radius: 11px;
+  background: #0e0f13;
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  animation: rise .3s ease both;
+}
+.available { color: var(--green); }
+.taken { color: #ff737c; }
+.error { color: #ffc477; }
+.neutral { color: #b8bac5; }
+.result-head { display: flex; align-items: center; gap: 8px; font-weight: 750; margin-bottom: 4px; }
+.status-icon { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; background: #ffffff09; }
 
-    button:hover { background: #ef4545; }
-    button:disabled { opacity: .6; cursor: wait; }
+.progress-track { height: 4px; background: #ffffff0b; border-radius: 10px; overflow: hidden; margin: 12px 0; }
+.progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #d9233e, #ff6972); border-radius: inherit; transition: width .25s; }
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 13px 0; }
+.stat { padding: 11px 7px; border: 1px solid #ffffff0c; border-radius: 10px; background: #ffffff03; text-align: center; }
+.stat strong { display: block; font-size: 19px; letter-spacing: -.5px; }
+.stat span { display: block; color: #828591; font-size: 10px; margin-top: 5px; }
+.stat:nth-child(1) strong { color: var(--green); }
+.stat:nth-child(2) strong { color: #ff737c; }
+.stat:nth-child(3) strong { color: #ffc477; }
+.results-list { max-height: 230px; overflow-y: auto; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; }
+.result-line { padding: 6px 2px; border-bottom: 1px solid #ffffff08; }
+.result-line:last-child { border: 0; }
+.small { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.divider { height: 1px; background: #ffffff0b; margin: 20px 0; }
+.features { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 8px 0 34px; }
+.feature { display: flex; gap: 11px; align-items: center; padding: 15px; border: 1px solid #ffffff0b; border-radius: 13px; background: #ffffff03; }
+.feature-icon { font-size: 17px; }
+.feature strong { display: block; font-size: 11px; }
+.feature span { display: block; color: var(--muted); font-size: 10px; margin-top: 5px; }
+footer { border-top: 1px solid #ffffff0c; padding: 22px 0 28px; color: #737681; font-size: 11px; }
+.footer-inner { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+footer b { color: #b9bac3; }
 
-    #result {
-      margin-top: 18px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #111217;
-      overflow-wrap: anywhere;
-      line-height: 1.5;
-    }
-
-    .available { color: #5be39a; }
-    .taken { color: #ff7070; }
-    .error { color: #ffc36b; }
-    .hidden { display: none; }
-  </style>
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; padding-top: 46px; gap: 12px; }
+  .hero-art { min-height: 250px; }
+  .workspace { grid-template-columns: 1fr; }
+  h1 { letter-spacing: -2.4px; }
+  .features { grid-template-columns: 1fr; }
+  .chip-one { left: 0; }
+  .chip-two { right: 0; }
+}
+@media (max-width: 420px) {
+  .wrap { width: calc(100% - 24px); }
+  nav { height: 66px; }
+  .nav-right .pill { padding: 8px; font-size: 10px; }
+  .panel { padding: 17px; }
+  .hero { padding-top: 34px; }
+  h1 { font-size: 41px; }
+  .hero-art { min-height: 235px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
 </head>
 <body>
-  <main class="panel">
-    <h1>Roblox Username Checker</h1>
-    <p>Check whether a Roblox username is available.</p>
+<div class="ambient"></div>
+<div class="grid"></div>
 
-    <form id="checker">
-      <input
-        id="username"
-        type="text"
-        placeholder="Enter a username"
-        minlength="3"
-        maxlength="20"
-        pattern="[A-Za-z0-9_]+"
-        autocomplete="off"
-        required
-      >
-      <button id="checkButton" type="submit">Check Username</button>
-    </form>
+<div class="wrap">
+  <nav>
+    <a href="#" class="brand" aria-label="UsernameChecker home">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3 20 7.5 12 12 4 7.5 12 3Z"/>
+          <path d="m4 12 8 4.5 8-4.5M4 16.5 12 21l8-4.5"/>
+        </svg>
+      </div>
+      <div>username<span>checker</span></div>
+    </a>
+    <div class="nav-right">
+      <div class="pill"><span class="dot"></span> Checker online</div>
+      <div class="pill">ROBLOX</div>
+    </div>
+  </nav>
 
-    <div id="result" class="hidden" role="status"></div>
+  <header class="hero">
+    <div>
+      <div class="eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
+        THE ULTIMATE USERNAME TOOL
+      </div>
+      <h1>Claim your<br>next <span class="accent">identity.</span></h1>
+      <p>Find your next Roblox username with a clean, fast checker. Test a single name or run a whole list in one place.</p>
+    </div>
+
+    <div class="hero-art" aria-label="Illustrated Roblox-style avatar">
+      <div class="art-glow"></div>
+      <div class="float-chip chip-one"><span class="dot"></span> Live checker <b>READY</b></div>
+      <div class="art-card">
+        <div class="art-top"><span class="art-label">USERNAME PROFILE / 001</span><span class="art-tag">● ONLINE</span></div>
+        <div class="avatar-scene">
+          <svg class="avatar-svg" viewBox="0 0 120 140" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="body" x1="20" y1="60" x2="100" y2="140" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ff6670"/><stop offset="1" stop-color="#a30f2c"/>
+              </linearGradient>
+              <linearGradient id="head" x1="30" y1="10" x2="85" y2="65" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#f8d0b0"/><stop offset="1" stop-color="#c98d72"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="60" cy="130" rx="39" ry="6" fill="#000" opacity=".3"/>
+            <path d="M34 79 18 91 25 115 40 111 43 95Z" fill="#252630" stroke="#41424c" stroke-width="2"/>
+            <path d="M86 79 102 91 95 115 80 111 77 95Z" fill="#252630" stroke="#41424c" stroke-width="2"/>
+            <path d="M37 72 24 80 35 104 47 99 47 81Z" fill="url(#body)"/>
+            <path d="M83 72 96 80 85 104 73 99 73 81Z" fill="url(#body)"/>
+            <rect x="40" y="103" width="16" height="29" rx="3" fill="#272831"/>
+            <rect x="64" y="103" width="16" height="29" rx="3" fill="#272831"/>
+            <path d="M35 62 Q35 53 44 53 H76 Q85 53 85 62 L91 98 Q91 104 84 104 H36 Q29 104 29 98Z" fill="url(#body)" stroke="#ff747c" stroke-width="1.5"/>
+            <path d="M48 72 60 80 72 72" stroke="#ffd2d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="48" y="45" width="24" height="16" rx="4" fill="#d8a184"/>
+            <rect x="31" y="13" width="58" height="49" rx="13" fill="url(#head)"/>
+            <path d="M30 31 Q25 8 47 8 Q54 0 68 7 Q91 5 92 27 L87 33 82 20 Q61 28 40 19 L35 36Z" fill="#25232b"/>
+            <path d="M44 39 Q48 35 53 39M67 39Q72 35 76 39" stroke="#40302e" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M51 49 Q60 56 70 49" stroke="#9d4c4c" stroke-width="2" stroke-linecap="round"/>
+            <path d="M29 34 Q24 34 27 43 Q29 48 33 43M91 34Q96 34 93 43Q91 48 87 43" fill="#d8a184"/>
+            <path d="M42 18 Q60 25 82 17" stroke="#4d4047" stroke-width="3" stroke-linecap="round"/>
+            <path d="M45 83 60 93 75 83" stroke="#ffb4b8" stroke-width="1.4" opacity=".65"/>
+          </svg>
+        </div>
+        <div class="art-bottom">
+          <div><div class="art-name">Your next username</div><div class="art-sub">A new identity starts here.</div></div>
+          <div class="art-check">✓</div>
+        </div>
+      </div>
+      <div class="float-chip chip-two">✦ <span>Made for</span> <b>ROBLOX</b></div>
+    </div>
+  </header>
+
+  <div class="section-heading">
+    <h2>Username workspace</h2>
+    <span>01 / CHECKER TOOLS</span>
+  </div>
+
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-heading">
+        <div class="panel-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4M8.5 11h5M11 8.5v5"/></svg>
+        </div>
+        <div><h2>Single username</h2><p>Check a name instantly</p></div>
+      </div>
+      <form id="checker">
+        <label class="field-label" for="username">USERNAME</label>
+        <div class="input-wrap">
+          <input id="username" type="text" placeholder="Enter username..." minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" autocomplete="off" required>
+          <span class="input-suffix">3–20</span>
+        </div>
+        <p class="hint">Use letters, numbers, and underscores. We'll ask the checker API for the result.</p>
+        <button id="checkButton" class="btn btn-primary" type="submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+          Check availability
+        </button>
+      </form>
+      <div id="result" class="result-box hidden" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div class="panel-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        </div>
+        <div><h2>Bulk checker</h2><p>Process a list of usernames</p></div>
+      </div>
+      <label class="field-label" for="bulkInput">YOUR LIST</label>
+      <textarea id="bulkInput" placeholder="shadowx&#10;pixelvoid&#10;coolname123&#10;..."></textarea>
+      <p class="hint">One name per line, or separate names with commas or spaces. Up to 500 unique names per batch.</p>
+      <button id="bulkButton" class="btn btn-primary" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Start bulk check
+      </button>
+      <div class="btn-row">
+        <button id="stopButton" class="btn btn-secondary" type="button" disabled>Stop</button>
+        <button id="downloadButton" class="btn btn-quiet" type="button" disabled>Export .txt</button>
+      </div>
+      <div id="bulkResult" class="result-box hidden" role="status" aria-live="polite">
+        <div id="bulkSummary" class="neutral">Your results will appear here.</div>
+        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+        <div class="stats">
+          <div class="stat"><strong id="availableCount">0</strong><span>AVAILABLE</span></div>
+          <div class="stat"><strong id="takenCount">0</strong><span>UNAVAILABLE</span></div>
+          <div class="stat"><strong id="errorCount">0</strong><span>ERRORS</span></div>
+        </div>
+        <div id="resultsList" class="results-list"></div>
+      </div>
+    </section>
   </main>
 
-  <script>
-    const API = "https://usernamechecker.jakakakaaalala.workers.dev";
+  <section class="features" aria-label="Features">
+    <div class="feature"><div class="feature-icon">⚡</div><div><strong>Simple & fast</strong><span>Check names in a few clicks</span></div></div>
+    <div class="feature"><div class="feature-icon">◈</div><div><strong>Bulk workflow</strong><span>Manage lists in one place</span></div></div>
+    <div class="feature"><div class="feature-icon">↧</div><div><strong>Export results</strong><span>Save your checked list locally</span></div></div>
+  </section>
 
-    const form = document.getElementById("checker");
-    const input = document.getElementById("username");
-    const button = document.getElementById("checkButton");
-    const result = document.getElementById("result");
+  <footer>
+    <div class="footer-inner">
+      <span><b>usernamechecker</b> · Built for finding your next name.</span>
+      <span>Independent fan-made tool · Not affiliated with Roblox</span>
+    </div>
+  </footer>
+</div>
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+<script>
+const API = "https://usernamechecker.jakakakaaalala.workers.dev";
 
-      const username = input.value.trim();
+const form = document.getElementById("checker");
+const input = document.getElementById("username");
+const button = document.getElementById("checkButton");
+const result = document.getElementById("result");
 
-      result.className = "";
-      result.textContent = "Checking username...";
-      button.disabled = true;
-      button.textContent = "Checking...";
+const bulkInput = document.getElementById("bulkInput");
+const bulkButton = document.getElementById("bulkButton");
+const stopButton = document.getElementById("stopButton");
+const downloadButton = document.getElementById("downloadButton");
+const bulkResult = document.getElementById("bulkResult");
+const bulkSummary = document.getElementById("bulkSummary");
+const progressFill = document.getElementById("progressFill");
+const resultsList = document.getElementById("resultsList");
 
-      try {
-        const response = await fetch(
-          `${API}/api/check?username=${encodeURIComponent(username)}`
-        );
+let stopRequested = false;
+let savedResults = [];
 
-        const data = await response.json();
+async function checkUsername(username) {
+  const response = await fetch(
+    `${API}/api/check?username=${encodeURIComponent(username)}`
+  );
+  const data = await response.json();
 
-        if (!response.ok || data.error) {
-          result.className = "error";
-          result.textContent = data.error || "The check failed. Try again.";
-        } else if (data.available) {
-          result.className = "available";
-          result.textContent = `✓ "${username}" appears to be available!`;
-        } else {
-          result.className = "taken";
-          result.textContent = `✗ "${username}" is unavailable. ${data.message || ""}`;
-        }
-      } catch (error) {
-        result.className = "error";
-        result.textContent = "Could not connect to the checker. Try again later.";
-      } finally {
-        button.disabled = false;
-        button.textContent = "Check Username";
-      }
-    });
-  </script>
+  if (!response.ok || data.error) {
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+  if (typeof data.available !== "boolean") {
+    throw new Error("Unexpected response from checker API");
+  }
+  return data.available;
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+  const username = input.value.trim();
+
+  result.className = "result-box";
+  result.innerHTML = '<div class="result-head"><span class="status-icon">↻</span> Checking username</div><span class="neutral">Contacting checker API...</span>';
+  button.disabled = true;
+  button.innerHTML = '<span class="spinner">◌</span> Checking...';
+
+  try {
+    const available = await checkUsername(username);
+    result.className = `result-box ${available ? "available" : "taken"}`;
+    result.innerHTML = `<div class="result-head"><span class="status-icon">${available ? "✓" : "×"}</span>${available ? "Possibly available" : "Unavailable"}</div><span></span>`;
+    result.querySelector("span:last-child").textContent =
+      available
+        ? `"${username}" appears to be available. Confirm in Roblox before choosing it.`
+        : `"${username}" appears to be unavailable.`;
+  } catch (error) {
+    result.className = "result-box error";
+    result.textContent = `Check failed: ${error.message}`;
+  } finally {
+    button.disabled = false;
+    button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg> Check availability';
+  }
+});
+
+function updateStats(available, taken, errors, done, total) {
+  document.getElementById("availableCount").textContent = available;
+  document.getElementById("takenCount").textContent = taken;
+  document.getElementById("errorCount").textContent = errors;
+  progressFill.style.width = `${total ? (done / total) * 100 : 0}%`;
+  bulkSummary.textContent = `${done} / ${total} checked${stopRequested ? " · Stopping" : ""}`;
+}
+
+function renderResults() {
+  resultsList.replaceChildren();
+  const fragment = document.createDocumentFragment();
+
+  for (const item of savedResults.slice(-100)) {
+    const line = document.createElement("div");
+    line.className = `result-line ${item.status === "AVAILABLE" ? "available" : item.status === "UNAVAILABLE" ? "taken" : "error"}`;
+    line.textContent = item.line;
+    fragment.appendChild(line);
+  }
+
+  resultsList.appendChild(fragment);
+}
+
+bulkButton.addEventListener("click", async () => {
+  const usernames = [...new Set(
+    bulkInput.value.split(/[\s,]+/).map(name => name.trim()).filter(Boolean)
+  )];
+
+  if (!usernames.length) {
+    bulkResult.className = "result-box error";
+    bulkResult.textContent = "Paste some usernames first.";
+    return;
+  }
+  if (usernames.length > 500) {
+    bulkResult.className = "result-box error";
+    bulkResult.textContent = "Please check 500 unique usernames or fewer per batch.";
+    return;
+  }
+
+  const invalid = usernames.filter(name => !/^[A-Za-z0-9_]{3,20}$/.test(name));
+  if (invalid.length) {
+    bulkResult.className = "result-box error";
+    bulkResult.textContent = `Invalid usernames (3–20 letters, numbers, or underscores): ${invalid.join(", ")}`;
+    return;
+  }
+
+  stopRequested = false;
+  savedResults = [];
+  bulkButton.disabled = true;
+  stopButton.disabled = false;
+  downloadButton.disabled = true;
+  bulkResult.className = "result-box";
+  resultsList.replaceChildren();
+
+  let available = 0, taken = 0, errors = 0, done = 0;
+  updateStats(available, taken, errors, done, usernames.length);
+
+  for (let i = 0; i < usernames.length; i++) {
+    if (stopRequested) break;
+
+    const name = usernames[i];
+
+    try {
+      const isAvailable = await checkUsername(name);
+      const status = isAvailable ? "AVAILABLE" : "UNAVAILABLE";
+      if (isAvailable) available++; else taken++;
+      savedResults.push({
+        name,
+        status,
+        line: `${status}: ${name}`
+      });
+    } catch (error) {
+      errors++;
+      savedResults.push({
+        name,
+        status: "ERROR",
+        line: `ERROR: ${name} (${error.message})`
+      });
+    }
+
+    done++;
+    updateStats(available, taken, errors, done, usernames.length);
+    renderResults();
+
+    if (i < usernames.length - 1 && !stopRequested) {
+      await new Promise(resolve => setTimeout(resolve, 350));
+    }
+  }
+
+  bulkSummary.textContent =
+    `${done} / ${usernames.length} checked` +
+    (stopRequested ? " · Stopped" : done === usernames.length ? " · Complete" : "");
+
+  bulkButton.disabled = false;
+  stopButton.disabled = true;
+  downloadButton.disabled = savedResults.length === 0;
+});
+
+stopButton.addEventListener("click", () => {
+  stopRequested = true;
+  stopButton.disabled = true;
+  bulkSummary.textContent += " · Stopping after current request";
+});
+
+downloadButton.addEventListener("click", () => {
+  const content = savedResults.map(item => item.line).join("\n");
+  const blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "username-check-results.txt";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+</script>
 </body>
 </html>
